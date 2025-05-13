@@ -19,6 +19,10 @@ export default function Overview({ course }: OverviewProps) {
         textSecondary: useThemeColor({}, 'textSecondary'),
         primary: useThemeColor({}, 'primary'),
     };
+    if (course?.discount) {
+        const discountedPrice = course.price * (1 - course.discount / 100);
+        course.discountedPrice = discountedPrice;
+    }
     if (!course) {
         return (
             <ThemedView style={{ padding: 16 }}>
@@ -41,7 +45,14 @@ export default function Overview({ course }: OverviewProps) {
                     </ThemedView>
                     <ThemedView style={styles.priceView}>
                         <ThemedText style={styles.price}>
-                            {course?.discountedPrice ? `${course.discountedPrice} $` : 'Free'}
+                            {course.discountedPrice
+                                ? course.discountedPrice === 0
+                                    ? 'Free'
+                                    : `$${course.discountedPrice}`
+                                : course.price === 0
+                                    ? 'Free'
+                                    : `$${course.price}`}
+
                         </ThemedText>
                     </ThemedView>
                 </ThemedView>

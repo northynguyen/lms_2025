@@ -13,8 +13,6 @@ interface LessonScreenProps {
 
 const LessonScreen = ({ course }: LessonScreenProps) => {
     const [expandedSections, setExpandedSections] = useState<string[]>([]);
-    console.log('course', course);
-
     const colors = {
         background: useThemeColor({}, 'background'),
         backgroundSecondary: useThemeColor({}, 'backgroundSecondary'),
@@ -124,3 +122,4 @@ const styles = StyleSheet.create({
 });
 
 export default LessonScreen;
+

@@ -11,11 +11,13 @@ const CourseCard: React.FC<{ course: Course; customStyle?: ViewStyle }> = ({ cou
     const discountedPrice = course.price * (1 - course.discount / 100);
     const colorScheme = useColorScheme();
     const isDarkTheme = colorScheme === 'dark';
-
+    const router = useRouter();
 
     const handlePress = () => {
-        const router = useRouter();
-        router.push(`/student/Courses/Index?courseId=${course.id}`);
+        router.push({
+            pathname: '/student/Courses/Index',
+            params: { courseId: course.id },
+        });
     };
 
     return (
@@ -54,11 +56,11 @@ const CourseCard: React.FC<{ course: Course; customStyle?: ViewStyle }> = ({ cou
                 {course.discount > 0 ? (
                     <ThemedView style={styles.priceContainer}>
                         <ThemedText type="defaultSemiBold" style={styles.discountedPrice}>
-                            {discountedPrice.toFixed(2)} đ
+                            ${discountedPrice.toFixed(2)}
                         </ThemedText>
                         <ThemedView style={styles.discountInfo}>
                             <ThemedText type="default" style={styles.oldPrice}>
-                                {course.price} đ
+                                ${course.price}
                             </ThemedText>
                             <ThemedText type="defaultSemiBold" style={styles.discountPercent}>
                                 -{course.discount}%
@@ -67,7 +69,7 @@ const CourseCard: React.FC<{ course: Course; customStyle?: ViewStyle }> = ({ cou
                     </ThemedView>
                 ) : (
                     <ThemedText type="defaultSemiBold" style={styles.coursePrice}>
-                        {course.price > 0 ? `${course.price} đ` : 'Free'}
+                        {course.price > 0 ? `$${course.price} ` : 'Free'}
                     </ThemedText>
                 )}
             </ThemedView>
