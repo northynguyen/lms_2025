@@ -110,7 +110,8 @@ export default function CourseDetailsLayout() {
                 }}
                 style={[styles.enrollButton, { backgroundColor: buttonBackground }]}
             >
-                <Text style={[styles.enrollButtonText, { color: 'white' }]}>ENROLL NOW</Text>
+                {/* <Text style={[styles.enrollButtonText, { color: 'white' }]}>ENROLL NOW</Text> */}
+                <Text style={[styles.enrollButtonText, { color: 'white' }]}>STUDY NOW</Text>
             </TouchableOpacity>
         </View>
     );
