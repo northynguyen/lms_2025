@@ -11,11 +11,13 @@ export const Colors = {
     backgroundSecondary: '#E6EAF4',
     textPrimary: '#424242',
     textSecondary: '#757575',
-
     tint: tintColorLight,
     icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: tintColorLight,
+    backgroundCard: '#FFFFFF',
+    buttonBackground: '#F5F5F5',
+    trackBackground: '#E0E0E0',
   },
   dark: {
     primary: '#90CAF9',
@@ -32,5 +34,8 @@ export const Colors = {
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
+    backgroundCard: '#1A1A1A',
+    buttonBackground: '#2A2A2A',
+    trackBackground: '#4A4A4A',
   },
 };

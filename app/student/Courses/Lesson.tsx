@@ -4,6 +4,7 @@ import { ThemedView } from '@/components/ThemedView';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { Course, Material, Section } from '@/interfaces/Interfaces';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 
@@ -20,17 +21,15 @@ const LessonScreen = ({ course }: LessonScreenProps) => {
         textSecondary: useThemeColor({}, 'textSecondary'),
         primary: useThemeColor({}, 'primary'),
     };
-
-    const toggleSection = (sectionId: string) => {
-        setExpandedSections(prev =>
-            prev.includes(sectionId)
-                ? prev.filter(id => id !== sectionId)
-                : [...prev, sectionId]
-        );
-    };
-
+    const router = useRouter();
     const handleMaterialPress = (material: Material) => {
-        // navigation.navigate('MaterialDetails', { materialData: material, courseSections: course?.sections || [] });
+        router.push({
+            pathname: '/student/Materials/MaterialDetails',
+            params: {
+                materialData: JSON.stringify(material),
+                courseSections: JSON.stringify(course?.sections || []),
+            },
+        });
     };
 
     const truncateText = (text: string, maxLength: number) => {

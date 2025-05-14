@@ -31,6 +31,10 @@ const MAPPING: IconMapping = {
   'rectangle.and.pencil.and.ellipsis': 'school',
   'doc.text': 'description',
   'doc': 'insert-drive-file',
+  'play.fill': 'play-arrow',
+  'pause.fill': 'pause',
+  'forward.fill': 'fast-forward',
+  'backward.fill': 'fast-rewind',
 } as IconMapping;
 
 /**

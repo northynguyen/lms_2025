@@ -26,7 +26,7 @@ function MainLayout() {
       <Stack initialRouteName="login" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="login" />
         <Stack.Screen name="register" />
-        <Stack.Screen name="student" options={{ contentStyle: { marginTop: 30 } }} />
+        <Stack.Screen name="student" options={{ contentStyle: { marginTop: 20 } }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

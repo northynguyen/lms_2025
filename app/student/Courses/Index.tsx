@@ -1,9 +1,11 @@
 import { useAuth } from '@/auth/AuthContext';
-import { DynamicTopTabs } from '@/components/DynamicTopTabs'; // Giả sử bạn lưu file đó ở components
+import AnimationStatus from '@/components/AnimationStatus'; // Adjust path as needed
+import { DynamicTopTabs } from '@/components/DynamicTopTabs';
+import { useThemeColor } from '@/hooks/useThemeColor';
 import { Course, Material, Section } from '@/interfaces/Interfaces';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Lessons from './Lesson';
 import Overview from './Overview';
 import Reviews from './Review';
@@ -11,13 +13,22 @@ import Reviews from './Review';
 export default function CourseDetailsLayout() {
     const { courseId } = useLocalSearchParams();
     const [course, setCourse] = useState<Course | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [animationStatus, setAnimationStatus] = useState<'loading' | 'success' | 'error' | null>('loading');
     const { url } = useAuth();
     const navigation = useNavigation();
+    const buttonBackground = useThemeColor({}, 'primary');
 
+    /*************  ✨ Windsurf Command ⭐  *************/
+    /**
+     * Fetches course data and associated materials from the API using the courseId.
+     * Integrates the fetched course data with its corresponding sections and updates the course state.
+     * Handles loading state and logs any errors encountered during the fetch process.
+     */
+    /*******  ff01968d-6a7c-4cc8-b68a-652af9f3d5d9  *******/
     useEffect(() => {
         const fetchCourseAndMaterials = async () => {
             try {
+                setAnimationStatus('loading');
                 const res = await fetch(`${url}/api/courses/${courseId}`);
                 const data = await res.json();
                 const courseData: Course = data.data;
@@ -28,17 +39,17 @@ export default function CourseDetailsLayout() {
 
                 const combinedCourse: Course = integrateCourseWithSections(courseData, apiSections);
                 setCourse(combinedCourse);
+                setAnimationStatus(null); // Hide animation on success to show course content
             } catch (err) {
                 console.error('Error fetching course or materials', err);
-            } finally {
-                setLoading(false);
+                setAnimationStatus('error');
             }
         };
 
         fetchCourseAndMaterials();
     }, [courseId]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (course) {
             navigation.setOptions({
                 headerShown: true,
@@ -47,20 +58,31 @@ export default function CourseDetailsLayout() {
         }
     }, [course, navigation]);
 
-    if (loading) {
+    const handleAnimationDone = () => {
+        setAnimationStatus(null); // Clear animation after error or success
+    };
+
+    if (animationStatus) {
         return (
             <View style={styles.loader}>
-                <ActivityIndicator size="large" />
+                <AnimationStatus
+                    status={animationStatus}
+                    text={
+                        animationStatus === 'loading'
+                            ? 'Loading...'
+                            : animationStatus === 'error'
+                                ? 'Course not found.'
+                                : 'Success!'
+                    }
+                    onDone={handleAnimationDone}
+                    show={!!animationStatus}
+                />
             </View>
         );
     }
 
     if (!course) {
-        return (
-            <View style={styles.loader}>
-                <Text>Course not found</Text>
-            </View>
-        );
+        return null; // AnimationStatus handles error case, so this should not be reached
     }
 
     const tabs = [
@@ -82,6 +104,14 @@ export default function CourseDetailsLayout() {
         <View style={{ flex: 1 }}>
             <Image source={{ uri: `${url}/${course.imageUrl}` }} style={styles.image} />
             <DynamicTopTabs tabs={tabs} />
+            <TouchableOpacity
+                onPress={() => {
+                    console.log('Enroll Now pressed');
+                }}
+                style={[styles.enrollButton, { backgroundColor: buttonBackground }]}
+            >
+                <Text style={[styles.enrollButtonText, { color: 'white' }]}>ENROLL NOW</Text>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -133,5 +163,19 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    enrollButton: {
+        position: 'absolute',
+        bottom: 20,
+        left: 20,
+        right: 20,
+        paddingVertical: 14,
+        borderRadius: 12,
+        alignItems: 'center',
+        zIndex: 100,
+    },
+    enrollButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
