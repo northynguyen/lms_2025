@@ -3,7 +3,7 @@ import AnimationStatus from '@/components/AnimationStatus';
 import { ThemedInput } from '@/components/ThemedInput'; // Import ThemedInput
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
-import { Feather } from '@expo/vector-icons';
+import { IconSymbol } from '@/components/ui/IconSymbol';
 import { useFocusEffect, useRouter } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
@@ -139,7 +139,11 @@ export default function Login() {
                                 type="rounded"
                             />
                             <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.icon}>
-                                <Feather name={showPassword ? 'eye' : 'eye-off'} size={24} color="#333" />
+                                <IconSymbol
+                                    name={showPassword ? 'eye.fill' : 'eye.slash.fill'}
+                                    size={24}
+                                    color="#333"
+                                />
                             </TouchableOpacity>
                         </ThemedView>
                         {errors.password ? (

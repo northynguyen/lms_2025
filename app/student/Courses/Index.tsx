@@ -1,11 +1,11 @@
 import { useAuth } from '@/auth/AuthContext';
-import AnimationStatus from '@/components/AnimationStatus'; // Adjust path as needed
+import AnimationStatus from '@/components/AnimationStatus';
 import { DynamicTopTabs } from '@/components/DynamicTopTabs';
 import { useThemeColor } from '@/hooks/useThemeColor';
 import { Course, Material, Section } from '@/interfaces/Interfaces';
-import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Lessons from './Lesson';
 import Overview from './Overview';
 import Reviews from './Review';
@@ -14,40 +14,61 @@ export default function CourseDetailsLayout() {
     const { courseId } = useLocalSearchParams();
     const [course, setCourse] = useState<Course | null>(null);
     const [animationStatus, setAnimationStatus] = useState<'loading' | 'success' | 'error' | null>('loading');
-    const { url } = useAuth();
+    const [isEnrolled, setIsEnrolled] = useState<boolean>(false);
+    const { url, token } = useAuth();
     const navigation = useNavigation();
+    const router = useRouter();
     const buttonBackground = useThemeColor({}, 'primary');
 
-    /*************  ✨ Windsurf Command ⭐  *************/
-    /**
-     * Fetches course data and associated materials from the API using the courseId.
-     * Integrates the fetched course data with its corresponding sections and updates the course state.
-     * Handles loading state and logs any errors encountered during the fetch process.
-     */
-    /*******  ff01968d-6a7c-4cc8-b68a-652af9f3d5d9  *******/
     useEffect(() => {
         const fetchCourseAndMaterials = async () => {
             try {
                 setAnimationStatus('loading');
-                const res = await fetch(`${url}/api/courses/${courseId}`);
-                const data = await res.json();
-                const courseData: Course = data.data;
 
-                const matRes = await fetch(`${url}/api/materials/course/${courseId}`);
-                const matData = await matRes.json();
-                const apiSections = matData.data;
+                // Fetch course details
+                const courseRes = await fetch(`${url}/api/courses/${courseId}`, {
+                    headers: {
+                        token: `${token}`,
+                    },
+                });
+                if (!courseRes.ok) throw new Error('Failed to fetch course');
+                const courseData = await courseRes.json();
+                const course: Course = courseData.data;
 
-                const combinedCourse: Course = integrateCourseWithSections(courseData, apiSections);
+                // Fetch materials for the course
+                const materialsRes = await fetch(`${url}/api/materials/course/${courseId}`, {
+                    headers: {
+                        token: `${token}`,
+                    },
+                });
+                if (!materialsRes.ok) throw new Error('Failed to fetch materials');
+                const materialsData = await materialsRes.json();
+                const apiSections = materialsData.data || [];
+
+                // Check enrollment status
+                const isEnrolledRes = await fetch(`${url}/api/enrollments/isEnrolled/${courseId}`, {
+                    headers: {
+                        token: `${token}`,
+                    },
+                });
+                if (!isEnrolledRes.ok) throw new Error('Failed to check enrollment');
+                const isEnrolledData = await isEnrolledRes.json();
+                setIsEnrolled(isEnrolledData.data || false);
+
+                // Integrate course with sections and materials
+                const combinedCourse: Course = integrateCourseWithSections(course, apiSections);
                 setCourse(combinedCourse);
-                setAnimationStatus(null); // Hide animation on success to show course content
+                setAnimationStatus(null);
             } catch (err) {
-                console.error('Error fetching course or materials', err);
+                console.error('Error fetching course or materials:', err);
                 setAnimationStatus('error');
             }
         };
 
-        fetchCourseAndMaterials();
-    }, [courseId]);
+        if (courseId && token) {
+            fetchCourseAndMaterials();
+        }
+    }, [courseId, token]);
 
     useLayoutEffect(() => {
         if (course) {
@@ -59,7 +80,30 @@ export default function CourseDetailsLayout() {
     }, [course, navigation]);
 
     const handleAnimationDone = () => {
-        setAnimationStatus(null); // Clear animation after error or success
+        setAnimationStatus(null);
+    };
+
+    const handleEnroll = async () => {
+        router.push('/student/payment');
+    };
+    const handleStudyNow = () => {
+        if (
+            course &&
+            course.sections &&
+            course.sections.length > 0 &&
+            course.sections[0].courseMaterials &&
+            course.sections[0].courseMaterials.length > 0
+        ) {
+            router.push({
+                pathname: '/student/Materials/MaterialDetails',
+                params: {
+                    materialData: JSON.stringify(course.sections[0].courseMaterials[0]),
+                    courseSections: JSON.stringify(course.sections),
+                },
+            });
+        } else {
+            Alert.alert('Error', 'No materials found for this course.');
+        }
     };
 
     if (animationStatus) {
@@ -82,7 +126,7 @@ export default function CourseDetailsLayout() {
     }
 
     if (!course) {
-        return null; // AnimationStatus handles error case, so this should not be reached
+        return null;
     }
 
     const tabs = [
@@ -105,13 +149,14 @@ export default function CourseDetailsLayout() {
             <Image source={{ uri: `${url}/${course.imageUrl}` }} style={styles.image} />
             <DynamicTopTabs tabs={tabs} />
             <TouchableOpacity
-                onPress={() => {
-                    console.log('Enroll Now pressed');
-                }}
+                // onPress={isEnrolled ? handleStudyNow : handleEnroll}
+                onPress={handleStudyNow}
                 style={[styles.enrollButton, { backgroundColor: buttonBackground }]}
             >
-                {/* <Text style={[styles.enrollButtonText, { color: 'white' }]}>ENROLL NOW</Text> */}
-                <Text style={[styles.enrollButtonText, { color: 'white' }]}>STUDY NOW</Text>
+                <Text style={[styles.enrollButtonText, { color: 'white' }]}>
+                    {/* {isEnrolled ? 'STUDY NOW' : 'ENROLL NOW'} */}
+                    STUDY NOW
+                </Text>
             </TouchableOpacity>
         </View>
     );
@@ -138,12 +183,12 @@ function mapApiSectionToSection(apiSection: any): Section {
         sectionName: apiSection.sectionName,
         orderNumber: apiSection.orderNumber,
         duration: calculateSectionDuration(apiSection.courseMaterials),
-        courseMaterials: apiSection.courseMaterials.map(mapApiMaterialToMaterial),
+        courseMaterials: apiSection.courseMaterials?.map(mapApiMaterialToMaterial) || [],
     };
 }
 
 function calculateSectionDuration(materials: any[]): number {
-    return materials.reduce((total, mat) => total + (mat.expectedDuration || 0), 0);
+    return materials?.reduce((total, mat) => total + (mat.expectedDuration || 0), 0) || 0;
 }
 
 function integrateCourseWithSections(course: Course, apiSections: any[]): Course {

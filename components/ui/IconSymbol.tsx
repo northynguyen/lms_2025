@@ -35,6 +35,9 @@ const MAPPING: IconMapping = {
   'pause.fill': 'pause',
   'forward.fill': 'fast-forward',
   'backward.fill': 'fast-rewind',
+  'bell.fill': 'notifications',
+  'eye.fill': 'visibility',
+  'eye.slash.fill': 'visibility-off',
 } as IconMapping;
 
 /**

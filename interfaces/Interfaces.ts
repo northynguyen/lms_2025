@@ -26,7 +26,7 @@ export interface Course {
     prerequisites: string[];
     discountedPrice: number;
     tags: Tags[];
-    sections: Section[];
+    sections?: Section[] | undefined;
 }
 export interface Material {
     id: string;

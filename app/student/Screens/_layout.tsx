@@ -52,7 +52,7 @@ export default function StudentHomeLayout() {
                 name="NotionScreen"
                 options={{
                     title: 'Notion',
-                    tabBarIcon: ({ color }) => <MaterialIcons size={28} name="description" color={color} />,
+                    tabBarIcon: ({ color }) => <MaterialIcons size={28} name="notifications" color={color} />,
                 }}
             />
             <Tabs.Screen

@@ -61,7 +61,7 @@ const LessonScreen = ({ course }: LessonScreenProps) => {
         const materials = item.courseMaterials || [];
 
         return (
-            <Collapsible title={`Chapter ${item.orderNumber}: ${truncateText(item.sectionName, 28)}`}>
+            <Collapsible title={`${truncateText(item.sectionName, 28)}`}>
                 <FlatList
                     data={materials.sort((a, b) => a.orderNum - b.orderNum)}
                     keyExtractor={(material) => material.id}
@@ -90,11 +90,11 @@ const LessonScreen = ({ course }: LessonScreenProps) => {
 
     return (
         <ThemedView style={[styles.container, { backgroundColor: 'transparent' }]}>
-            {course.sections.length === 0 && (
+            {course.sections?.length === 0 && (
                 <ThemedText style={styles.emptyText}>Can not find lectures</ThemedText>
             )}
             <FlatList
-                data={course.sections.sort((a, b) => a.orderNumber - b.orderNumber)}
+                data={course.sections?.sort((a, b) => a.orderNumber - b.orderNumber)}
                 keyExtractor={(item) => item.sectionId}
                 renderItem={renderSectionItem}
                 showsVerticalScrollIndicator={false}
